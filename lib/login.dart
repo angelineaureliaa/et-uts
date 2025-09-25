@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart'; // supaya bisa akses main() & active_user
 
 class Login extends StatefulWidget {
+  const Login({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _LoginState();

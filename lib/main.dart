@@ -8,11 +8,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 String active_user = "";
 String active_name = "";
 String active_photo = "";
+String active_email = "";
 
 Future<String> checkUser() async {
   final prefs = await SharedPreferences.getInstance();
-  String username = prefs.getString("username") ?? '';
-  return username;
+  String email = prefs.getString("email") ?? '';
+  return email;
 }
 
 void main() async {
@@ -45,7 +46,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
       ),
       home: const MyHomePage(title: "Home Page"),
       //ini routes buat navbar!
@@ -75,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text("Daftar Mahasiswa"),
       ),
 
-      drawer: myDrawer(),
+      drawer: myDrawer(context),
 
       body: SingleChildScrollView(
         child: Column(
@@ -95,31 +96,56 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget myDrawer() {
+  Widget myDrawer(BuildContext context) {
     return Drawer(
-      elevation: 16.0,
-      child: Column(
+      child: ListView(
+        padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
-            accountName: Text(active_name),
-            accountEmail: null,
+            decoration: const BoxDecoration(color: Colors.white),
+            accountName: Text(
+              active_name,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            accountEmail: Text(
+              active_email,
+              style: const TextStyle(color: Color.fromARGB(255, 100, 100, 100)),
+            ),
             currentAccountPicture: CircleAvatar(
               backgroundImage: NetworkImage(active_photo),
             ),
           ),
-          ListTile(
-            title: const Text("List Mahasiswa"),
-            leading: const Icon(Icons.people),
-            onTap: () {},
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              "Menu",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
           ),
           ListTile(
+            leading: const Icon(Icons.home, color: Colors.black),
+            title: const Text("Home"),
+            onTap: () {
+              Navigator.pushNamed(context, 'home');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.person, color: Colors.black),
             title: const Text("Edit Profile"),
-            leading: const Icon(Icons.edit),
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, 'editProfile');
+            },
           ),
           ListTile(
-            title: const Text("Log Out"),
-            leading: const Icon(Icons.logout),
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text("Logout", style: TextStyle(color: Colors.red)),
             onTap: () async {
               final prefs = await SharedPreferences.getInstance();
               prefs.clear();
@@ -147,6 +173,12 @@ List<Widget> detailMahasiswa(BuildContext context) {
     //pertama buat containernya dulu!
     //setiap kali loop nilai value current index sama kayak counter saat itu!
     final int _currentIndex = _counter;
+
+    //loncati index mahasiswa yang sedang login
+    if (mahasiswas[_currentIndex].email == active_email) {
+      _counter++;
+      continue;
+    }
 
     Widget w = Container(
       margin: const EdgeInsets.all(15),
@@ -193,7 +225,10 @@ List<Widget> detailMahasiswa(BuildContext context) {
 
                   Text(
                     "NRP: ${mahasiswas[_currentIndex].nrp}",
-                    style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 94, 93, 93)),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color.fromARGB(255, 86, 85, 85),
+                    ),
                   ),
 
                   const SizedBox(height: 10),
@@ -221,8 +256,8 @@ List<Widget> detailMahasiswa(BuildContext context) {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
+                      backgroundColor: const Color.fromARGB(255, 248, 188, 206),
+                      foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 12,

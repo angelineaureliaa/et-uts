@@ -4,6 +4,7 @@ class Mahasiswa {
   String password;
   String name;
   String nrp;
+  String email;
   String prodi;
   String description;
   String photo;
@@ -16,6 +17,7 @@ class Mahasiswa {
     required this.password,
     required this.name,
     required this.nrp,
+    required this.email,
     required this.prodi,
     required this.description,
     required this.photo,
@@ -28,7 +30,8 @@ var mahasiswas = <Mahasiswa>[
     username: 'budi',
     password: '123',
     name: 'Budi Santoso',
-    nrp:"160426001",
+    nrp: "160426001",
+    email: "s160426001@student.ubaya.ac.id",
     prodi: 'Informatika',
     description: 'Budi Santoso adalah mahasiswa Informatika yang dikenal tekun dan penuh rasa ingin tahu. '
         'Sejak awal kuliah, ia sudah menunjukkan ketertarikan pada pemrograman, khususnya pengembangan aplikasi mobile. '
@@ -44,7 +47,8 @@ var mahasiswas = <Mahasiswa>[
     username: 'siti',
     password: '123',
     name: 'Siti Aminah',
-     nrp:"160426002",
+    nrp: "160426002",
+    email: "s160426002@student.ubaya.ac.id",
     prodi: 'Sistem Informasi',
     description: 'Siti Aminah adalah mahasiswa Sistem Informasi yang dikenal aktif di berbagai kegiatan organisasi. '
         'Ia sering dipercaya menjadi ketua panitia acara besar dan memiliki keterampilan komunikasi yang baik. '
@@ -59,7 +63,8 @@ var mahasiswas = <Mahasiswa>[
     username: 'eko',
     password: '123',
     name: 'Eko Prasetyo',
-    nrp:"160426003",
+    nrp: "160426003",
+    email: "s160426003@student.ubaya.ac.id",
     prodi: 'Teknik Komputer',
     description: 'Eko Prasetyo adalah mahasiswa Teknik Komputer yang memiliki passion besar terhadap dunia perangkat keras. '
         'Sejak SMA, ia sudah gemar membongkar perangkat elektronik dan merakit komputer. Hal ini membuatnya cepat memahami '
@@ -74,7 +79,8 @@ var mahasiswas = <Mahasiswa>[
     username: 'lisa',
     password: '123',
     name: 'Lisa Marlina',
-    nrp:"160426004",
+    nrp: "160426004",
+    email: "s160426004@student.ubaya.ac.id",
     prodi: 'Data Science',
     description: 'Lisa Marlina adalah mahasiswa Data Science yang menaruh perhatian besar pada bidang Natural Language Processing (NLP). '
         'Ketertarikannya berawal dari hobinya membaca artikel tentang kecerdasan buatan dan bagaimana teknologi ini bisa '
@@ -88,8 +94,9 @@ var mahasiswas = <Mahasiswa>[
     id: 5,
     username: 'susi',
     password: '123',
-    nrp:"160426005",
     name: 'Susi Susanti',
+    nrp: "160426005",
+    email: "s160426005@student.ubaya.ac.id",
     prodi: 'Cyber Security',
     description: 'Susi Susanti adalah mahasiswa Cyber Security yang sangat antusias terhadap dunia keamanan digital. '
         'Ia percaya bahwa perkembangan teknologi harus dibarengi dengan kesadaran akan risiko keamanan. '

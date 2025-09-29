@@ -35,7 +35,11 @@ class Detailstudent extends StatelessWidget {
             context: context,
             builder: (BuildContext context) => AlertDialog(
               //judul alertnya apa
-              title: Text('Berhasil!'),
+              title: const Text(
+                'Berhasil',
+                style: TextStyle(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
               content: Text('$name berhasil ditambahkan sebagai teman!'),
               actions: <Widget>[
                 TextButton(
@@ -66,8 +70,11 @@ class Detailstudent extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             width: 800,
             decoration: BoxDecoration(
-              color: Colors.deepPurple.withOpacity(
-                0.05,
+              color: Color.fromARGB(
+                255,
+                246,
+                219,
+                227,
               ), //warna background dari container
               borderRadius: BorderRadius.circular(20), //buat sudut jadi bulat!
             ),
@@ -101,7 +108,7 @@ class Detailstudent extends StatelessWidget {
                   "NRP: $nrp",
                   style: TextStyle(
                     color: Colors.black.withOpacity(0.6),
-                    fontSize: 24.0,
+                    fontSize: 18.0,
                   ),
                 ),
                 SingleChildScrollView(
@@ -112,14 +119,14 @@ class Detailstudent extends StatelessWidget {
                     margin: EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
-                      color: Colors.deepPurpleAccent.withOpacity(0.1),
+                      color: Color.fromARGB(255, 248, 188, 206),
                     ),
                     child: Column(
                       children: [
                         Text(
                           "Program/Lab",
                           style: TextStyle(
-                            fontSize: 24.0,
+                            fontSize: 20.0,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -127,7 +134,7 @@ class Detailstudent extends StatelessWidget {
                           prodi,
                           style: TextStyle(
                             color: Colors.black.withOpacity(0.6),
-                            fontSize: 20.0,
+                            fontSize: 18.0,
                           ),
                         ),
                       ],
@@ -142,7 +149,7 @@ class Detailstudent extends StatelessWidget {
                     margin: EdgeInsets.all(10),
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.deepPurpleAccent.withOpacity(0.1),
+                      color: Color.fromARGB(255, 248, 188, 206),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Column(
@@ -152,7 +159,7 @@ class Detailstudent extends StatelessWidget {
                           textAlign: TextAlign.left,
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: 24.0,
+                            fontSize: 20.0,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -161,7 +168,7 @@ class Detailstudent extends StatelessWidget {
                           textAlign: TextAlign.justify,
                           style: TextStyle(
                             color: Colors.black.withOpacity(0.6),
-                            fontSize: 20.0,
+                            fontSize: 18.0,
                           ),
                         ),
                       ],

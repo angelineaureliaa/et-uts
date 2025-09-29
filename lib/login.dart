@@ -13,23 +13,42 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  String _username = "";
-  String _password = "";
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+   @override
+  void initState() {
+    super.initState();
+    //setiap kali login dibuka, clear all textbox
+    _emailController.clear();
+    _passwordController.clear();
+  }
 
   //simpan data mahasiswa ke SharedPreferences
   void doLogin() async {
+    final String _email = _emailController.text.trim();
+    final String _password = _passwordController.text.trim();
     bool valid = false;
 
+    if (_email.isEmpty || _password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Email dan Password tidak boleh kosong")),
+      );
+      return;
+    }
+
     for (var m in mahasiswas) {
-      if (m.username == _username && m.password == _password) {
+      if (m.email == _email && m.password == _password) {
         final prefs = await SharedPreferences.getInstance();
         prefs.setString("username", m.username);
         prefs.setString("name", m.name);
         prefs.setString("photo", m.photo);
+        prefs.setString("email", m.email);
 
         active_user = m.username;
         active_name = m.name;
         active_photo = m.photo;
+        active_email = m.email;
         valid = true;
 
         Navigator.pushNamed(context, 'main');
@@ -39,7 +58,7 @@ class _LoginState extends State<Login> {
 
     if (!valid) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Username atau password salah")),
+        const SnackBar(content: Text("Email atau password salah")),
       );
     }
   }
@@ -47,62 +66,126 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Container(
-        height: 300,
-        margin: const EdgeInsets.all(20),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(30)),
-          border: Border.all(width: 1),
-          color: Colors.white,
-          boxShadow: const [BoxShadow(blurRadius: 20)],
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Username',
-                  hintText: 'Enter valid username',
-                ),
-                onChanged: (v) {
-                  _username = v;
-                },
+      body: Center(
+        child: Container(
+          width: double.infinity,
+          margin: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 20,
+                offset: Offset(0, 8),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                obscureText: true,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Password',
-                  hintText: 'Enter secure password',
-                ),
-                onChanged: (v) {
-                  _password = v;
-                },
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("Login",
+                style: TextStyle(
+                  fontSize: 22, 
+                  fontWeight: FontWeight.bold),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: SizedBox(
-                height: 50,
-                width: 300,
-                child: ElevatedButton(
-                  onPressed: doLogin,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(fontSize: 25, color: Colors.white),
+
+              const SizedBox(height: 8),
+
+              const Text("Masukkan email dan password Anda",
+                style: TextStyle(
+                  fontSize: 14, 
+                  color: Colors.grey),
+              ),
+
+              const SizedBox(height: 20),
+
+              Align(
+                alignment: Alignment.centerLeft,
+                child: const Text("Email",
+                  style: TextStyle(
+                    fontSize: 14, 
+                    fontWeight: FontWeight.bold),
+                ),
+              ),
+
+              const SizedBox(height: 5),
+              
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  hintText: "nama@email.com",
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 15,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
                   ),
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 15),
+
+              Align(
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  "Password",
+                  style: TextStyle(
+                    fontSize: 14, 
+                    fontWeight: FontWeight.bold),
+                ),
+              ),
+
+              const SizedBox(height: 5),
+
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: "Masukkan password",
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 15,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                height: 45,
+                child: ElevatedButton(
+                  onPressed: doLogin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black87,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    "Login",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

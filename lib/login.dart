@@ -23,16 +23,16 @@ class _LoginState extends State<Login> {
     for (var m in mahasiswas) {
       if (m.username == _username && m.password == _password) {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("username", m.username);
-        await prefs.setString("name", m.name);
-        await prefs.setString("photo", m.photo);
+        prefs.setString("username", m.username);
+        prefs.setString("name", m.name);
+        prefs.setString("photo", m.photo);
 
         active_user = m.username;
         active_name = m.name;
         active_photo = m.photo;
         valid = true;
 
-        Navigator.pushReplacementNamed(context, 'main');
+        Navigator.pushNamed(context, 'main');
         break;
       }
     }

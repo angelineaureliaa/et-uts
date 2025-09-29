@@ -15,13 +15,6 @@ Future<String> checkUser() async {
   return username;
 }
 
-Future<void> initUser() async {
-  final prefs = await SharedPreferences.getInstance();
-  active_user = prefs.getString("username") ?? "";
-  active_name = prefs.getString("name") ?? "Guest";
-  active_photo = prefs.getString("photo") ?? "https://i.pravatar.cc/150";
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   checkUser().then((String result) {
@@ -42,12 +35,6 @@ void main() async {
       runApp(const MyApp());
     }
   });
-}
-
-void doLogout() async {
-  final prefs = await SharedPreferences.getInstance();
-  prefs.remove("username");
-  main();
 }
 
 class MyApp extends StatelessWidget {
@@ -94,7 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('List Mahasiwa uhuy'),
             ListView(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
@@ -136,11 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
             leading: const Icon(Icons.logout),
             onTap: () async {
               final prefs = await SharedPreferences.getInstance();
-              await prefs.clear();
-              active_user = "";
-              active_name = "Guest";
-              active_photo = "https://i.pravatar.cc/150";
-
+              prefs.clear();
               Navigator.pushNamed(context, 'login');
             },
           ),
@@ -155,14 +137,17 @@ class _MyHomePageState extends State<MyHomePage> {
 List<Widget> detailMahasiswa(BuildContext context) {
   //utk menampung data sementara
   List<Widget> temp = [];
+
   //set initial value utk i >> var counter
   int _counter = 0;
+
   while (_counter < mahasiswas.length) {
     //utk tiap data di mahasiswa,
     //buat button yang mengarahkan ke nnti detail mahasiswa!
     //pertama buat containernya dulu!
     //setiap kali loop nilai value current index sama kayak counter saat itu!
-    final int _currentIndex=_counter;
+    final int _currentIndex = _counter;
+
     Widget w = Container(
       margin: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -175,6 +160,7 @@ List<Widget> detailMahasiswa(BuildContext context) {
           ),
         ],
       ),
+
       child: Card(
         //krn card itu cmn bs punya 1 child aja, jadi dia hrs pake column
         //baru columnya pny children!
@@ -184,25 +170,68 @@ List<Widget> detailMahasiswa(BuildContext context) {
               margin: const EdgeInsets.all(20),
               child: Column(
                 children: [
+                  Text(
+                    mahasiswas[_currentIndex].name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    width: 100,
+                    height: 100,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(
+                        mahasiswas[_currentIndex].photo,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+
+                  Text(
+                    "NRP: ${mahasiswas[_currentIndex].nrp}",
+                    style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 94, 93, 93)),
+                  ),
+
+                  const SizedBox(height: 10),
+
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                         //urutan hrs diperhatiin sesuai gimana cara declare constructornya
-                        context, MaterialPageRoute(
+                        context,
+                        MaterialPageRoute(
                           //karena value data berubah-ubah sesuai yg iterasi saat ini, maka jgn pake const!
                           //klo pake const dia akan error!
-                          builder: (context) =>  Detailstudent
-                          //kirim data urut berupa id, name, prodi, desc, photo
-                          (mahasiswas[_currentIndex].id, 
-                          mahasiswas[_currentIndex].name,
-                          mahasiswas[_currentIndex].nrp, 
-                          mahasiswas[_currentIndex].prodi,
-                          mahasiswas[_currentIndex].description,
-                          mahasiswas[_currentIndex].photo),
+                          builder: (context) =>
+                              Detailstudent
+                              //kirim data urut berupa id, name, prodi, desc, photo
+                              (
+                                mahasiswas[_currentIndex].id,
+                                mahasiswas[_currentIndex].name,
+                                mahasiswas[_currentIndex].nrp,
+                                mahasiswas[_currentIndex].prodi,
+                                mahasiswas[_currentIndex].description,
+                                mahasiswas[_currentIndex].photo,
+                              ),
                         ),
                       );
                     },
-                    child: const Text("Detail Mahasiswa"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text("Lihat Detail Profil"),
                   ),
                 ],
               ),
@@ -213,7 +242,7 @@ List<Widget> detailMahasiswa(BuildContext context) {
     );
     //klo udh selesai maka add widgetnya ke list
     temp.add(w);
-    _counter+=1;
+    _counter += 1;
   }
   return temp;
 }

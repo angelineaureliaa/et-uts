@@ -16,7 +16,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-   @override
+  @override
   void initState() {
     super.initState();
     //setiap kali login dibuka, clear all textbox
@@ -26,11 +26,11 @@ class _LoginState extends State<Login> {
 
   //simpan data mahasiswa ke SharedPreferences
   void doLogin() async {
-    final String _email = _emailController.text.trim();
-    final String _password = _passwordController.text.trim();
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
     bool valid = false;
 
-    if (_email.isEmpty || _password.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Email dan Password tidak boleh kosong")),
       );
@@ -38,12 +38,13 @@ class _LoginState extends State<Login> {
     }
 
     for (var m in mahasiswas) {
-      if (m.email == _email && m.password == _password) {
+      if (m.email == email && m.password == password) {
         final prefs = await SharedPreferences.getInstance();
         prefs.setString("username", m.username);
         prefs.setString("name", m.name);
         prefs.setString("photo", m.photo);
-        prefs.setString("email", m.email);
+        prefs.setString("description", m.description);
+        prefs.setString("prodi", m.prodi);
 
         active_user = m.username;
         active_name = m.name;
@@ -85,33 +86,30 @@ class _LoginState extends State<Login> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text("Login",
-                style: TextStyle(
-                  fontSize: 22, 
-                  fontWeight: FontWeight.bold),
+              const Text(
+                "Login",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
 
               const SizedBox(height: 8),
 
-              const Text("Masukkan email dan password Anda",
-                style: TextStyle(
-                  fontSize: 14, 
-                  color: Colors.grey),
+              const Text(
+                "Masukkan email dan password Anda",
+                style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
 
               const SizedBox(height: 20),
 
               Align(
                 alignment: Alignment.centerLeft,
-                child: const Text("Email",
-                  style: TextStyle(
-                    fontSize: 14, 
-                    fontWeight: FontWeight.bold),
+                child: const Text(
+                  "Email",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
               ),
 
               const SizedBox(height: 5),
-              
+
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -135,9 +133,7 @@ class _LoginState extends State<Login> {
                 alignment: Alignment.centerLeft,
                 child: const Text(
                   "Password",
-                  style: TextStyle(
-                    fontSize: 14, 
-                    fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
               ),
 

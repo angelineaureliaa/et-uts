@@ -4,6 +4,7 @@ import 'package:projectuts/detailstudent.dart';
 import 'package:projectuts/login.dart';
 //dependeciesnya ada di file pubspec.yaml
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:projectuts/editprofile.dart';
 
 String active_user = "";
 String active_name = "";
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
       routes: {
         'login': (context) => Login(),
         'main': (context) => const MyHomePage(title: "List Mahasiswa"),
+        'edit': (context) => const EditProfile(),
       },
     );
   }
@@ -140,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
             leading: const Icon(Icons.person, color: Colors.black),
             title: const Text("Edit Profile"),
             onTap: () {
-              Navigator.pushNamed(context, 'editProfile');
+              Navigator.pushNamed(context, 'edit');
             },
           ),
           ListTile(
@@ -165,18 +167,18 @@ List<Widget> detailMahasiswa(BuildContext context) {
   List<Widget> temp = [];
 
   //set initial value utk i >> var counter
-  int _counter = 0;
+  int counter = 0;
 
-  while (_counter < mahasiswas.length) {
+  while (counter < mahasiswas.length) {
     //utk tiap data di mahasiswa,
     //buat button yang mengarahkan ke nnti detail mahasiswa!
     //pertama buat containernya dulu!
     //setiap kali loop nilai value current index sama kayak counter saat itu!
-    final int _currentIndex = _counter;
+    final int currentIndex = counter;
 
     //loncati index mahasiswa yang sedang login
-    if (mahasiswas[_currentIndex].email == active_email) {
-      _counter++;
+    if (mahasiswas[currentIndex].email == active_email) {
+      counter++;
       continue;
     }
 
@@ -203,7 +205,7 @@ List<Widget> detailMahasiswa(BuildContext context) {
               child: Column(
                 children: [
                   Text(
-                    mahasiswas[_currentIndex].name,
+                    mahasiswas[currentIndex].name,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -217,14 +219,14 @@ List<Widget> detailMahasiswa(BuildContext context) {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.asset(
-                        mahasiswas[_currentIndex].photo,
+                        mahasiswas[currentIndex].photo,
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
 
                   Text(
-                    "NRP: ${mahasiswas[_currentIndex].nrp}",
+                    "NRP: ${mahasiswas[currentIndex].nrp}",
                     style: const TextStyle(
                       fontSize: 14,
                       color: Color.fromARGB(255, 86, 85, 85),
@@ -245,12 +247,12 @@ List<Widget> detailMahasiswa(BuildContext context) {
                               Detailstudent
                               //kirim data urut berupa id, name, prodi, desc, photo
                               (
-                                mahasiswas[_currentIndex].id,
-                                mahasiswas[_currentIndex].name,
-                                mahasiswas[_currentIndex].nrp,
-                                mahasiswas[_currentIndex].prodi,
-                                mahasiswas[_currentIndex].description,
-                                mahasiswas[_currentIndex].photo,
+                                mahasiswas[currentIndex].id,
+                                mahasiswas[currentIndex].name,
+                                mahasiswas[currentIndex].nrp,
+                                mahasiswas[currentIndex].prodi,
+                                mahasiswas[currentIndex].description,
+                                mahasiswas[currentIndex].photo,
                               ),
                         ),
                       );
@@ -277,7 +279,7 @@ List<Widget> detailMahasiswa(BuildContext context) {
     );
     //klo udh selesai maka add widgetnya ke list
     temp.add(w);
-    _counter += 1;
+    counter += 1;
   }
   return temp;
 }

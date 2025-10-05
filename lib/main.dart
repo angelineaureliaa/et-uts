@@ -70,6 +70,25 @@ class MyHomePage extends StatefulWidget {
 
 //INI BUATTT LIST MAHASSIWA YAH FRENS
 class _MyHomePageState extends State<MyHomePage> {
+  String name = "";
+  String email = "";
+  String photo = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadActiveUser();
+  }
+
+  Future<void> _loadActiveUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      name = prefs.getString("name") ?? "";
+      email = prefs.getString("email") ?? "";
+      photo = prefs.getString("photo") ?? "";
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
           UserAccountsDrawerHeader(
             decoration: const BoxDecoration(color: Colors.white),
             accountName: Text(
-              active_name,
+              name,
               style: const TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -143,6 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
             title: const Text("Edit Profile"),
             onTap: () {
               Navigator.pushNamed(context, 'edit');
+              _loadActiveUser();
             },
           ),
           ListTile(

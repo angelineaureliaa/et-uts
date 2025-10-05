@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'class/mahasiswa.dart';
-import 'package:projectuts/main.dart';
+//import 'package:projectuts/main.dart';
 
 //pakai stateful widget biar bisa melakukan perubahan pada data!
 class EditProfile extends StatefulWidget {
@@ -22,6 +22,15 @@ class _EditProfile extends State<EditProfile> {
     _loadUserData();
   }
 
+  // Future<void> _loadUserData() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     _nameController.text = prefs.getString("name") ?? "";
+  //     _descController.text = prefs.getString("description") ?? "";
+  //     _prodi = prefs.getString("prodi");
+  //   });
+  // }
+
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -32,10 +41,26 @@ class _EditProfile extends State<EditProfile> {
   }
 
   Future<void> _saveUserData() async {
+    String newName = _nameController.text;
+    String newProdi = _prodi ?? "";
+    String newDesc = _descController.text;
+
     final prefs = await SharedPreferences.getInstance();
+    String? username = prefs.getString("username");
     await prefs.setString("name", _nameController.text);
     await prefs.setString("prodi", _prodi ?? "");
     await prefs.setString("description", _descController.text);
+
+    if (username != null && username.isNotEmpty) {
+      for (var m in mahasiswas) {
+        if (m.username == username) {
+          m.name = newName;
+          m.prodi = newProdi;
+          m.description = newDesc;
+          break;
+        }
+      }
+    }
 
     showDialog(
       context: context,

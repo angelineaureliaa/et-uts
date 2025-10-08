@@ -24,7 +24,6 @@ void main() async {
     if (result == '') {
       runApp(
         MaterialApp(
-          debugShowCheckedModeBanner: false,
           home: Login(),
           routes: {
             'login': (context) => Login(),
@@ -77,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _loadActiveUser();
+    _loadActiveUser();  
   }
 
   Future<void> _loadActiveUser() async {
@@ -125,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
           UserAccountsDrawerHeader(
             decoration: const BoxDecoration(color: Colors.white),
             accountName: Text(
-              name,
+              active_name,
               style: const TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -167,11 +166,12 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text("Logout", style: TextStyle(color: Colors.red)),
+            title: const Text("Log Out", style: TextStyle(color: Colors.red)),
             onTap: () async {
               final prefs = await SharedPreferences.getInstance();
-              prefs.clear();
-              Navigator.pushNamed(context, 'login');
+              await prefs.clear();
+              
+              Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
             },
           ),
         ],
@@ -186,6 +186,15 @@ List<Widget> detailMahasiswa(BuildContext context) {
   //utk menampung data sementara
   List<Widget> temp = [];
 
+  //cari NRP user aktif dari active_email
+  String activeNrp = '';
+  for (final m in mahasiswas) {
+    if (m.email == active_email) {
+      activeNrp = m.nrp;
+      break;
+    }
+  }
+
   //set initial value utk i >> var counter
   int counter = 0;
 
@@ -195,12 +204,6 @@ List<Widget> detailMahasiswa(BuildContext context) {
     //pertama buat containernya dulu!
     //setiap kali loop nilai value current index sama kayak counter saat itu!
     final int currentIndex = counter;
-
-    //loncati index mahasiswa yang sedang login
-    if (mahasiswas[currentIndex].email == active_email) {
-      counter++;
-      continue;
-    }
 
     Widget w = Container(
       margin: const EdgeInsets.all(15),
@@ -257,6 +260,7 @@ List<Widget> detailMahasiswa(BuildContext context) {
 
                   ElevatedButton(
                     onPressed: () {
+                      final bool showFab = mahasiswas[currentIndex].nrp != activeNrp;
                       Navigator.push(
                         //urutan hrs diperhatiin sesuai gimana cara declare constructornya
                         context,
@@ -273,6 +277,7 @@ List<Widget> detailMahasiswa(BuildContext context) {
                                 mahasiswas[currentIndex].prodi,
                                 mahasiswas[currentIndex].description,
                                 mahasiswas[currentIndex].photo,
+                                showFab,
                               ),
                         ),
                       );

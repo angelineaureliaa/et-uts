@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:projectuts/class/mahasiswa.dart'; 
+import 'package:shared_preferences/shared_preferences.dart';
 
 //pakai stateless widget krn tdk ada perubahan yg terjadi
 //cuman showing aja!
@@ -10,6 +12,8 @@ class Detailstudent extends StatelessWidget {
   final String prodi;
   final String description;
   final String imgPath;
+  final bool showFab;
+
   //paremter yg dibutuhkan utk page ini, hrs diambil di constructor
   const Detailstudent(
     this.id,
@@ -17,9 +21,11 @@ class Detailstudent extends StatelessWidget {
     this.nrp,
     this.prodi,
     this.description,
-    this.imgPath, {
+    this.imgPath,
+    this.showFab, {
     super.key,
   });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +34,7 @@ class Detailstudent extends StatelessWidget {
         title: Text("Detail Mahasiswa"),
       ),
       //buat floating action button buat addfrriends!
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: showFab ? FloatingActionButton(
         onPressed: () {
           //klo fabnya diklik, maka muncul notifbar!
           showDialog<String>(
@@ -53,7 +59,7 @@ class Detailstudent extends StatelessWidget {
         },
         //kasih icon tambah teman!
         child: const Icon(Icons.person_add),
-      ),
+      ) : null,
       //utk body, kita pakai singlechildscroll view
       //supaya klo datanya panjang, dia scrollable
       body: SingleChildScrollView(

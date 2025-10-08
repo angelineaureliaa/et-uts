@@ -24,6 +24,13 @@ class _LoginState extends State<Login> {
     _passwordController.clear();
   }
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   //simpan data mahasiswa ke SharedPreferences
   void doLogin() async {
     final String email = _emailController.text.trim();
@@ -45,6 +52,7 @@ class _LoginState extends State<Login> {
         prefs.setString("photo", m.photo);
         prefs.setString("description", m.description);
         prefs.setString("prodi", m.prodi);
+        prefs.setString("email", m.email);
 
         active_user = m.username;
         active_name = m.name;
@@ -52,7 +60,8 @@ class _LoginState extends State<Login> {
         active_email = m.email;
         valid = true;
 
-        Navigator.pushNamed(context, 'main');
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(context, 'main', (route) => false);
         break;
       }
     }
@@ -112,17 +121,12 @@ class _LoginState extends State<Login> {
 
               TextField(
                 controller: _emailController,
+                autofillHints: const [],
                 decoration: InputDecoration(
                   hintText: "nama@email.com",
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 15,
                     vertical: 12,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
                   ),
                 ),
               ),
@@ -141,18 +145,14 @@ class _LoginState extends State<Login> {
 
               TextField(
                 controller: _passwordController,
+                //sembunyikan karakter -> jadi bulet"
                 obscureText: true,
+                autofillHints: const [],
                 decoration: InputDecoration(
                   hintText: "Masukkan password",
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 15,
                     vertical: 12,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
                   ),
                 ),
               ),

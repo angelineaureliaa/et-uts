@@ -127,7 +127,7 @@ class _EditProfile extends State<EditProfile> {
             const SizedBox(height: 10),
             TextField(
               controller: _descController,
-              maxLines: 4,
+              maxLines: 10,
               decoration: const InputDecoration(labelText: "Deskripsi"),
             ),
             const SizedBox(height: 20),

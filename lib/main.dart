@@ -76,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _loadActiveUser();  
+    _loadActiveUser();
   }
 
   Future<void> _loadActiveUser() async {
@@ -124,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
           UserAccountsDrawerHeader(
             decoration: const BoxDecoration(color: Colors.white),
             accountName: Text(
-              active_name,
+              name,
               style: const TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -170,8 +170,12 @@ class _MyHomePageState extends State<MyHomePage> {
             onTap: () async {
               final prefs = await SharedPreferences.getInstance();
               await prefs.clear();
-              
-              Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                'login',
+                (route) => false,
+              );
             },
           ),
         ],
@@ -260,7 +264,8 @@ List<Widget> detailMahasiswa(BuildContext context) {
 
                   ElevatedButton(
                     onPressed: () {
-                      final bool showFab = mahasiswas[currentIndex].nrp != activeNrp;
+                      final bool showFab =
+                          mahasiswas[currentIndex].nrp != activeNrp;
                       Navigator.push(
                         //urutan hrs diperhatiin sesuai gimana cara declare constructornya
                         context,

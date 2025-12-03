@@ -58,9 +58,9 @@ class _RequestsState extends State<Requests> {
     final response = await http.post(
       Uri.parse("https://ubaya.cloud/flutter/160422026/uas/bacarequest.php"),
       //kirimin parameter key nya di webservice itu cari, valuenya txtCari
-      body: {'idUserLogin': widget.idMahasiswaLogin.toString()},
+      body: {'id': widget.idMahasiswaLogin.toString()},
     );
-    //print(response.body);
+    print(response.body);
     if (response.statusCode == 200) {
       return response.body;
     } else {
@@ -169,6 +169,7 @@ class _RequestsState extends State<Requests> {
                             child: ElevatedButton(
                               onPressed: () {
                                 //panggil api tolak
+                                rejectFriend(ReqFriends[index].idSender);
                               },
                               child: Text(
                                 'Tolak',
@@ -221,6 +222,38 @@ class _RequestsState extends State<Requests> {
           context,
           //munculin notif berhasil hapus genre
         ).showSnackBar(SnackBar(content: Text('Sukses berteman!')));
+        setState(() {
+          bacaData(); //baca ulang data!!
+        });
+      }
+    } else {
+      throw Exception('Failed to read API');
+    }
+  }
+
+
+  void rejectFriend(friendId) async {
+    final response = await http.post(
+      Uri.parse(
+        "https://ubaya.cloud/flutter/160422026/uas/tolakpertemanan.php",
+      ),
+      //kirimin parameter key nya di webservice itu cari, valuenya txtCari
+      body: {
+        'id_user': widget.idMahasiswaLogin.toString(),
+        'id_friend_request': friendId.toString(),
+      },
+    );
+    print('id_user: ${friendId}, id_teman: ${widget.idMahasiswaLogin.toString()}');
+    //asumsi pertemanan ini adalah user_id >> nama org yg request dan friend_id itu nama org yg acc!
+    if (response.statusCode == 200) {
+      //klo berhasil
+      // print(response.body); //buat debugging
+      Map json = jsonDecode(response.body);
+      if (json['result'] == "success") {
+        ScaffoldMessenger.of(
+          context,
+          //munculin notif berhasil hapus genre
+        ).showSnackBar(SnackBar(content: Text('Berhasil tolak permintaan!')));
         setState(() {
           bacaData(); //baca ulang data!!
         });

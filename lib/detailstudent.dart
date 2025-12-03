@@ -1,30 +1,35 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:projectuts/class/mahasiswa.dart'; 
+import 'package:projectuts/class/mahasiswa.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
-//pakai stateless widget krn tdk ada perubahan yg terjadi
-//cuman showing aja!
-class Detailstudent extends StatelessWidget {
-  //deklarasi item yang diterima disini!
-  final int id; //tampung idnya
-  final String nrp;
-  final String name;
-  final String prodi;
-  final String description;
-  final String imgPath;
-  final bool showFab;
+class Detailstudent extends StatefulWidget {
+  final int idMahasiswa;
+  int idMahasiswaLogin = 0;
+  Detailstudent({super.key, required this.idMahasiswa});
+  @override
+  State<Detailstudent> createState() => _DetailstudentState();
+}
 
-  //paremter yg dibutuhkan utk page ini, hrs diambil di constructor
-  const Detailstudent(
-    this.id,
-    this.name,
-    this.nrp,
-    this.prodi,
-    this.description,
-    this.imgPath,
-    this.showFab, {
-    super.key,
-  });
+class _DetailstudentState extends State<Detailstudent> {
+  //inisialisasi object mahasiswa
+  Mahasiswa? _mhs;
+  bool _statusPengajuan =
+      false; //initial value utk cek apakah dia udh teman/udh ngajuin!
+  String message =
+      ""; //ini itu buat tampung klo dia pertemanannya gk muncul dia statusnya apa
+  //apakah udah teman atau sdg mengajukan atau dia udh ajuin ke kita!
+  @override
+  void initState() {
+    super.initState();
+    //pertama di run, jalankan baca data!
+    _loadUser().then((_) {
+      bacaData();
+      cekStatusPertemenan();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,39 +38,54 @@ class Detailstudent extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text("Detail Mahasiswa"),
       ),
-      //buat floating action button buat addfrriends!
-      floatingActionButton: showFab ? FloatingActionButton(
-        onPressed: () {
-          //klo fabnya diklik, maka muncul notifbar!
-          showDialog<String>(
-            context: context,
-            builder: (BuildContext context) => AlertDialog(
-              //judul alertnya apa
-              title: const Text(
-                'Berhasil',
-                style: TextStyle(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              content: Text('$name berhasil ditambahkan sebagai teman!'),
-              actions: <Widget>[
-                TextButton(
-                  //klo diklik nutup popupnya
-                  onPressed: () => Navigator.pop(context, 'OK'),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
-        },
-        //kasih icon tambah teman!
-        child: const Icon(Icons.person_add),
-      ) : null,
-      //utk body, kita pakai singlechildscroll view
-      //supaya klo datanya panjang, dia scrollable
-      body: SingleChildScrollView(
-        //single sroll view hny punya child,
-        //makanya hrs dikasih column biar bs tampung bnyk element
-        //atau children
+      //tambahin fab disini! >> ada gaknya fab ditentuin oleh statusPengajuan
+      floatingActionButton: _statusPengajuan
+          ? FloatingActionButton(
+              onPressed: () {
+                sendRequest();
+              },
+              //kasih icon tambah teman!
+              child: const Icon(Icons.person_add),
+            )
+          : null,
+      body: ListView(children: <Widget>[tampilData()]),
+    );
+  }
+
+  //buat method utk request ke API!
+  Future<String> fetchData() async {
+    final response = await http.post(
+      Uri.parse(
+        "https://ubaya.cloud/flutter/160422026/uas/detailmahasiswa.php",
+      ),
+      body: {'id': widget.idMahasiswa.toString()},
+    );
+    // print("BODY: ${response.body}");
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Failed to read API');
+    }
+  }
+
+  //method utk baca data!
+  bacaData() {
+    fetchData().then((value) {
+      Map json = jsonDecode(value);
+      //baca data mahasiswa yg disimpen di key data!
+      //krn disimpan di list, jadi ambil indeks ke 0 nya
+      _mhs = Mahasiswa.fromJson(json['data'][0]);
+      setState(() {});
+    });
+  }
+
+  //urus tampil datanya disini!!
+  Widget tampilData() {
+    //klo mahasiswa ditemukan
+    if (_mhs == null) {
+      return Center(child: CircularProgressIndicator());
+    } else {
+      return SingleChildScrollView(
         child: Align(
           //dikasih align biar dia posisinya ditengah!
           alignment: Alignment.center,
@@ -87,6 +107,10 @@ class Detailstudent extends StatelessWidget {
             //di dalam container itu diisi dgn column utk mengisi gambar, desc, dll
             child: Column(
               children: [
+                //jika messagenya gk kosong maka tampilin chipnya!
+                message != ""
+                    ? InputChip(label: Text(message))
+                    : SizedBox.shrink(),
                 //buat AVA BUNDAR!
                 Container(
                   //tentukan panjang, lebar
@@ -96,7 +120,7 @@ class Detailstudent extends StatelessWidget {
                   margin: EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage('../$imgPath'),
+                      image: AssetImage('${_mhs!.photo}'),
                       //biar gambarnya memenuhi container!
                       fit: BoxFit.cover,
                     ),
@@ -107,11 +131,11 @@ class Detailstudent extends StatelessWidget {
                 //kasih pembatas kayak 20 pake divider
                 //isi text sesuai var name
                 Text(
-                  name,
+                  _mhs!.name,
                   style: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  "NRP: $nrp",
+                  "NRP: ${_mhs!.nrp}",
                   style: TextStyle(
                     color: Colors.black.withOpacity(0.6),
                     fontSize: 18.0,
@@ -137,7 +161,7 @@ class Detailstudent extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          prodi,
+                          _mhs!.prodi,
                           style: TextStyle(
                             color: Colors.black.withOpacity(0.6),
                             fontSize: 18.0,
@@ -170,7 +194,7 @@ class Detailstudent extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          description,
+                          _mhs!.description,
                           textAlign: TextAlign.justify,
                           style: TextStyle(
                             color: Colors.black.withOpacity(0.6),
@@ -185,7 +209,81 @@ class Detailstudent extends StatelessWidget {
             ),
           ),
         ),
-      ),
+      );
+    }
+  }
+
+  Future<void> _loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      widget.idMahasiswaLogin = prefs.getInt("id") ?? 0;
+    });
+  }
+
+  //cek status pertemanan!!
+  void cekStatusPertemenan() async {
+    final response = await http.post(
+      Uri.parse("https://ubaya.cloud/flutter/160422026/uas/cekstatusteman.php"),
+      body: {
+        //id user itu yg mengajukan!!
+        'id_user': widget.idMahasiswaLogin.toString(),
+        'id_teman': widget.idMahasiswa.toString(),
+      },
     );
+    //print('id_user: ${widget.idMahasiswaLogin}, id_teman: ${widget.idMahasiswa}');
+
+    //baca status codenya!
+    //print(response.body);
+    if (response.statusCode == 200) {
+      // print(response.body);
+      Map json = jsonDecode(response.body);
+      //klo udh berteman, maka yaudah ubah statusnya jadi friend!
+      if (json['status'] == "success") {
+        //cek apakah dia itu user yg sama dengan yg login gk
+        //klo gk sama bru statusnya true!
+        if (widget.idMahasiswaLogin != widget.idMahasiswa) {
+          setState(() {
+            _statusPengajuan = true;
+            bacaData();
+          });
+        }
+      } else {
+        //selain ini set messagenya sesuai statusnya!
+        setState(() {
+          //perubahan hrs di dlm setstate!
+          message = json['status'];
+          bacaData();
+        });
+      }
+    } else {
+      throw Exception('Failed to read API');
+    }
+  }
+
+  //kirim friend request
+  void sendRequest() async {
+    final response = await http.post(
+      Uri.parse(
+        "https://ubaya.cloud/flutter/160422026/uas/tambahpertemanan.php",
+      ),
+      body: {
+        'id_user': widget.idMahasiswaLogin.toString(),
+        'id_teman': widget.idMahasiswa.toString(),
+      },
+    );
+    //baca status codenya!
+    if (response.statusCode == 200) {
+      print(response.body);
+      Map json = jsonDecode(response.body);
+      //klo json resultnya ok!!
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Permintaan pertemanan Anda sedang diajukan!")),
+      );
+      setState(() {
+        bacaData();
+      });
+    } else {
+      throw Exception('Failed to read API');
+    }
   }
 }

@@ -47,6 +47,7 @@ class _LoginState extends State<Login> {
     for (var m in mahasiswas) {
       if (m.email == email && m.password == password) {
         final prefs = await SharedPreferences.getInstance();
+        prefs.setInt("id", m.id);
         prefs.setString("username", m.username);
         prefs.setString("name", m.name);
         prefs.setString("photo", m.photo);

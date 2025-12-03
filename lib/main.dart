@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:projectuts/class/mahasiswa.dart';
+import 'package:projectuts/contacts.dart';
 import 'package:projectuts/detailstudent.dart';
 import 'package:projectuts/login.dart';
+import 'package:projectuts/request.dart';
 //dependeciesnya ada di file pubspec.yaml
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:projectuts/editprofile.dart';
@@ -53,6 +55,8 @@ class MyApp extends StatelessWidget {
       routes: {
         'login': (context) => Login(),
         'main': (context) => const MyHomePage(title: "List Mahasiswa"),
+        'contact': (context) => Contact(),
+        'request': (context) => Requests(),
         'edit': (context) => const EditProfile(),
       },
     );
@@ -154,6 +158,20 @@ class _MyHomePageState extends State<MyHomePage> {
             title: const Text("Home"),
             onTap: () {
               Navigator.pushNamed(context, 'home');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.contacts, color: Colors.black),
+            title: const Text("Contacts"),
+            onTap: () {
+              Navigator.pushNamed(context, 'contact');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.request_quote, color: Colors.black),
+            title: const Text("Request"),
+            onTap: () {
+              Navigator.pushNamed(context, 'request');
             },
           ),
           ListTile(
@@ -273,17 +291,8 @@ List<Widget> detailMahasiswa(BuildContext context) {
                           //karena value data berubah-ubah sesuai yg iterasi saat ini, maka jgn pake const!
                           //klo pake const dia akan error!
                           builder: (context) =>
-                              Detailstudent
-                              //kirim data urut berupa id, name, prodi, desc, photo
-                              (
-                                mahasiswas[currentIndex].id,
-                                mahasiswas[currentIndex].name,
-                                mahasiswas[currentIndex].nrp,
-                                mahasiswas[currentIndex].prodi,
-                                mahasiswas[currentIndex].description,
-                                mahasiswas[currentIndex].photo,
-                                showFab,
-                              ),
+                              Detailstudent( idMahasiswa: mahasiswas[currentIndex].id,)
+                              
                         ),
                       );
                     },

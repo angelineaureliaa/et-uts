@@ -9,8 +9,8 @@ class Mahasiswa {
   String description;
   String photo;
 
-  //required means this field may not be null.
-  //If it is not required, either provide default value or make it nullable
+  //required artinya field tersebut wajib diisi
+  //klo gak wajib diisi, maka boleh buat gk dikasi required
   Mahasiswa({
     required this.id,
     required this.username,
@@ -22,7 +22,26 @@ class Mahasiswa {
     required this.description,
     required this.photo,
   });
+
+//baca file json return dari WebService
+factory Mahasiswa.fromJson(Map<String, dynamic> json) {
+  return Mahasiswa(
+    //kiri nama variabel yg diinisialisasiin as properties!
+    //json [nama kolom di db]
+    id: json['id'] as int,
+    username: json['username'] as String,
+    password: json['password'] as String,
+    name: json['name'] as String,
+    nrp: json['nrp'] as String,
+    email:json['email'] as String, 
+    prodi:json['nama_prodi'] as String,
+    description:json['description'] as String,
+    photo:json['photo'] as String,
+  );
+ }
 }
+List<Mahasiswa> Mhs=[]; //list utk menampung semua data mahasiswa
+
 
 var mahasiswas = <Mahasiswa>[
   Mahasiswa(

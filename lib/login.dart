@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:projectuts/class/mahasiswa.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart'; // supaya bisa akses main() & active_user
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -35,7 +37,6 @@ class _LoginState extends State<Login> {
   void doLogin() async {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
-    bool valid = false;
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -44,33 +45,44 @@ class _LoginState extends State<Login> {
       return;
     }
 
-    for (var m in mahasiswas) {
-      if (m.email == email && m.password == password) {
-        final prefs = await SharedPreferences.getInstance();
-        prefs.setInt("id", m.id);
-        prefs.setString("username", m.username);
-        prefs.setString("name", m.name);
-        prefs.setString("photo", m.photo);
-        prefs.setString("description", m.description);
-        prefs.setString("prodi", m.prodi);
-        prefs.setString("email", m.email);
+    final response = await http.post(
+      Uri.parse("https://ubaya.cloud/flutter/160422026/uas/login.php"),
+      body: {'email': email, 'password': password},
+    );
 
-        active_user = m.username;
-        active_name = m.name;
-        active_photo = m.photo;
-        active_email = m.email;
-        valid = true;
+    if (response.statusCode == 200) {
+      Map<String, dynamic> json = jsonDecode(response.body);
+
+      if (json['result'] == 'success') {
+         Map<String, dynamic> data = json['data'];
+
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setInt("id", data['id']);
+        prefs.setString("username", data['username']);
+        prefs.setString("name", data['name']);
+        prefs.setString("photo", data['photo']);
+        prefs.setString("description", data['description']);
+        prefs.setString("prodi", data['prodi']);
+        prefs.setString("email", data['email']);
+
+        active_user = data['username'];
+        active_name = data['name'];
+        active_photo = data['photo'];
+        active_email = data['email'];
 
         if (!mounted) return;
-        Navigator.pushNamedAndRemoveUntil(context, 'main', (route) => false);
-        break;
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MyApp()),
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(json['message'] ?? "Username atau password salah")),
+        );
       }
     }
-
-    if (!valid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email atau password salah")),
-      );
+    else {
+      throw Exception('Failed to read API');
     }
   }
 

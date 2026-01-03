@@ -7,6 +7,8 @@ import 'package:projectuts/request.dart';
 //dependeciesnya ada di file pubspec.yaml
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:projectuts/editprofile.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 String active_user = "";
 String active_name = "";
@@ -76,11 +78,13 @@ class _MyHomePageState extends State<MyHomePage> {
   String name = "";
   String email = "";
   String photo = "";
+  List<Widget> listMahasiswa = [];
 
   @override
   void initState() {
     super.initState();
     _loadActiveUser();
+    _loadMahasiswa();
   }
 
   Future<void> _loadActiveUser() async {
@@ -89,6 +93,13 @@ class _MyHomePageState extends State<MyHomePage> {
       name = prefs.getString("name") ?? "";
       email = prefs.getString("email") ?? "";
       photo = prefs.getString("photo") ?? "";
+    });
+  }
+
+  Future<void> _loadMahasiswa() async {
+    var data = await detailMahasiswa(context);
+    setState(() {
+      listMahasiswa = data;
     });
   }
 
@@ -108,11 +119,17 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             ListView(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              //isi listviewnya apa aja!
-              //panggil dari method detailMahasiswa, tampilan diatur di method ini
-              //kirim parameter berupa context, biar nnti dia bisa direct ke page detail student!
-              children: detailMahasiswa(context),
+              physics: const NeverScrollableScrollPhysics(),
+              children: listMahasiswa.isEmpty
+                  ? [
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    ]
+                  : listMahasiswa,
             ),
           ],
         ),
@@ -202,123 +219,130 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-//method dummy buat testing ke detail student!
-//kasih parameter, supaya dia bs terima context!
-List<Widget> detailMahasiswa(BuildContext context) {
-  //utk menampung data sementara
+Future<List<Widget>> detailMahasiswa(BuildContext context) async {
   List<Widget> temp = [];
 
-  //cari NRP user aktif dari active_email
-  String activeNrp = '';
-  for (final m in mahasiswas) {
-    if (m.email == active_email) {
-      activeNrp = m.nrp;
-      break;
-    }
-  }
+  final response = await http.get(
+    Uri.parse("https://ubaya.cloud/flutter/160422026/uas/listmahasiswa.php"),
+  );
 
-  //set initial value utk i >> var counter
-  int counter = 0;
+  if (response.statusCode == 200) {
+    var json = jsonDecode(response.body);
 
-  while (counter < mahasiswas.length) {
-    //utk tiap data di mahasiswa,
-    //buat button yang mengarahkan ke nnti detail mahasiswa!
-    //pertama buat containernya dulu!
-    //setiap kali loop nilai value current index sama kayak counter saat itu!
-    final int currentIndex = counter;
+    if (json['result'] == 'success') {
+      List data = json['data'];
 
-    Widget w = Container(
-      margin: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Color.fromRGBO(128, 128, 128, 0.5),
-            spreadRadius: -6,
-            blurRadius: 8,
-            offset: const Offset(8, 7),
-          ),
-        ],
-      ),
+      for (int i = 0; i < data.length; i++) {
+        var m = data[i];
 
-      child: Card(
-        //krn card itu cmn bs punya 1 child aja, jadi dia hrs pake column
-        //baru columnya pny children!
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Text(
-                    mahasiswas[currentIndex].name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    width: 100,
-                    height: 100,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        mahasiswas[currentIndex].photo,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-
-                  Text(
-                    "NRP: ${mahasiswas[currentIndex].nrp}",
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color.fromARGB(255, 86, 85, 85),
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  ElevatedButton(
-                    onPressed: () {
-                      final bool showFab =
-                          mahasiswas[currentIndex].nrp != activeNrp;
-                      Navigator.push(
-                        //urutan hrs diperhatiin sesuai gimana cara declare constructornya
-                        context,
-                        MaterialPageRoute(
-                          //karena value data berubah-ubah sesuai yg iterasi saat ini, maka jgn pake const!
-                          //klo pake const dia akan error!
-                          builder: (context) =>
-                              Detailstudent( idMahasiswa: mahasiswas[currentIndex].id,)
-                              
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 248, 188, 206),
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text("Lihat Detail Profil"),
-                  ),
-                ],
+        Widget w = Container(
+          margin: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: const Color.fromRGBO(128, 128, 128, 0.5),
+                spreadRadius: -6,
+                blurRadius: 8,
+                offset: const Offset(8, 7),
               ),
+            ],
+          ),
+          child: Card(
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Text(
+                        m['name'],
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        width: 100,
+                        height: 100,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            m['photo'],
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.person, size: 60),
+                          ),
+                        ),
+                      ),
+
+                      Text(
+                        "NRP: ${m['nrp']}",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color.fromARGB(255, 86, 85, 85),
+                        ),
+                      ),
+
+                      Text(
+                        "Prodi: ${m['prodi_name']}",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color.fromARGB(255, 86, 85, 85),
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Detailstudent(
+                                idMahasiswa: int.parse(m['id']),
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            248,
+                            188,
+                            206,
+                          ),
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text("Lihat Detail Profil"),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
+        );
+
+        temp.add(w);
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(json['message'] ?? "Gagal memuat data mahasiswa"),
         ),
-      ),
-    );
-    //klo udh selesai maka add widgetnya ke list
-    temp.add(w);
-    counter += 1;
+      );
+    }
+  } else {
+    throw Exception('Failed to read API');
   }
   return temp;
 }

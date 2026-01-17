@@ -194,9 +194,12 @@ class _MyHomePageState extends State<MyHomePage> {
           ListTile(
             leading: const Icon(Icons.person, color: Colors.black),
             title: const Text("Edit Profile"),
-            onTap: () {
-              Navigator.pushNamed(context, 'edit');
-              _loadActiveUser();
+            onTap: () async {
+              // Navigator.pop(context);
+              await Navigator.pushNamed(context, 'edit');
+              await _loadActiveUser();
+              await _loadMahasiswa();
+              setState(() {});
             },
           ),
           ListTile(

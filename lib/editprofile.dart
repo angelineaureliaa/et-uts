@@ -14,11 +14,10 @@ class _EditProfileState extends State<EditProfile> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
 
-  int? _prodiId; // simpan prodi_id (int)
+  int? _prodiId;
   List<Map<String, dynamic>> _prodiList = [];
 
   bool _loading = true;
-  bool _saving = false;
 
   @override
   void initState() {
@@ -26,64 +25,38 @@ class _EditProfileState extends State<EditProfile> {
     _initData();
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descController.dispose();
-    super.dispose();
-  }
-
   Future<void> _initData() async {
-    setState(() => _loading = true);
     await _fetchProdiList();
     await _fetchUser();
-    if (mounted) setState(() => _loading = false);
+    setState(() => _loading = false);
   }
 
-  Future<int?> _getUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt("id");
-  }
-
-  // bwt ambil prodi dari tabel prodi
+  // ambil daftar prodi
   Future<void> _fetchProdiList() async {
     try {
       final response = await http.get(
         Uri.parse("https://ubaya.cloud/flutter/160422026/uas/listprodi.php"),
       );
-      if (response.statusCode != 200)
-        throw Exception("HTTP ${response.statusCode}");
 
-      final Map<String, dynamic> json = jsonDecode(response.body);
+      final json = jsonDecode(response.body);
+
       if (json["result"] == "success") {
         _prodiList = List<Map<String, dynamic>>.from(json["data"]);
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(json["message"] ?? "Gagal load prodi")),
-        );
       }
     } catch (e) {
-      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error load prodi: $e")));
+      ).showSnackBar(SnackBar(content: Text("Gagal load prodi")));
     }
   }
 
-  // bwt smbil detail
+  // ambil detail mahasiswa login
   Future<void> _fetchUser() async {
     try {
-      final userId = await _getUserId();
-      if (userId == null) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("ID user tidak ditemukan di SharedPreferences"),
-          ),
-        );
-        return;
-      }
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt("id");
+
+      if (userId == null) return;
 
       final response = await http.post(
         Uri.parse(
@@ -92,86 +65,67 @@ class _EditProfileState extends State<EditProfile> {
         body: {"id": userId.toString()},
       );
 
-      if (response.statusCode != 200)
-        throw Exception("HTTP ${response.statusCode}");
-
-      final Map<String, dynamic> json = jsonDecode(response.body);
+      final json = jsonDecode(response.body);
 
       if (json["result"] == "success") {
-        final Map<String, dynamic> data = json["data"][0];
+        final data = json["data"][0];
 
-        _nameController.text = (data["name"] ?? "").toString();
-        _descController.text = (data["description"] ?? "").toString();
-        _prodiId = int.tryParse((data["prodi_id"] ?? "").toString());
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(json["message"] ?? "Gagal ambil data user")),
-        );
+        _nameController.text = data["name"] ?? "";
+        _descController.text = data["description"] ?? "";
+        _prodiId = int.parse(data["prodi_id"].toString());
       }
     } catch (e) {
-      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ).showSnackBar(SnackBar(content: Text("Gagal ambil data user")));
     }
   }
 
+  // update profile
   Future<void> _updateUser() async {
     final newName = _nameController.text.trim();
     final newDesc = _descController.text.trim();
-    final prodiId = _prodiId;
 
-    if (newName.isEmpty || prodiId == null) {
+    if (newName.isEmpty || _prodiId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Nama dan Prodi wajib diisi.")),
       );
       return;
     }
 
-    setState(() => _saving = true);
-
     try {
-      final userId = await _getUserId();
-      if (userId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("ID user tidak ditemukan.")),
-        );
-        return;
-      }
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt("id");
+
+      if (userId == null) return;
 
       final response = await http.post(
         Uri.parse("https://ubaya.cloud/flutter/160422026/uas/editprofil.php"),
         body: {
           "id": userId.toString(),
           "name": newName,
-          "prodi_id": prodiId.toString(),
+          "prodi_id": _prodiId.toString(),
           "description": newDesc,
         },
       );
 
-      if (response.statusCode != 200)
-        throw Exception("HTTP ${response.statusCode}");
-
-      final Map<String, dynamic> json = jsonDecode(response.body);
+      final json = jsonDecode(response.body);
 
       if (json["result"] == "success") {
-        final prefs = await SharedPreferences.getInstance();
         await prefs.setString("name", newName);
         await prefs.setString("description", newDesc);
-        await prefs.setInt("prodi_id", prodiId); // optional
+        await prefs.setInt("prodi_id", _prodiId!);
 
-        if (!mounted) return;
         showDialog(
           context: context,
-          builder: (_) => AlertDialog(
+          builder: (dialogContext) => AlertDialog(
             title: const Text("Berhasil"),
             content: const Text("Data berhasil diperbarui!"),
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context); // close dialog
-                  Navigator.pop(context); // balik ke halaman sebelumnya
+                  Navigator.pop(dialogContext); // tutup dialog
+                  Navigator.pop(context); // balik halaman
                 },
                 child: const Text("OK"),
               ),
@@ -179,18 +133,14 @@ class _EditProfileState extends State<EditProfile> {
           ),
         );
       } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(json["message"] ?? "Update gagal")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Update gagal")));
       }
     } catch (e) {
-      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
-    } finally {
-      if (mounted) setState(() => _saving = false);
+      ).showSnackBar(SnackBar(content: Text("Terjadi kesalahan saat update")));
     }
   }
 
@@ -208,6 +158,7 @@ class _EditProfileState extends State<EditProfile> {
                     controller: _nameController,
                     decoration: const InputDecoration(labelText: "Nama"),
                   ),
+
                   const SizedBox(height: 10),
 
                   DropdownButtonFormField<int>(
@@ -223,25 +174,21 @@ class _EditProfileState extends State<EditProfile> {
                   ),
 
                   const SizedBox(height: 10),
+
                   TextField(
                     controller: _descController,
-                    maxLines: 10,
+                    maxLines: 5,
                     decoration: const InputDecoration(labelText: "Deskripsi"),
                   ),
 
                   const SizedBox(height: 20),
+
                   SizedBox(
                     width: double.infinity,
                     height: 45,
                     child: ElevatedButton(
-                      onPressed: _saving ? null : _updateUser,
-                      child: _saving
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text("Simpan"),
+                      onPressed: _updateUser,
+                      child: const Text("Simpan"),
                     ),
                   ),
                 ],
